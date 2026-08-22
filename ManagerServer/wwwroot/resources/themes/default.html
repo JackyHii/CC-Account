@@ -12,7 +12,7 @@ main { background-color: var(--paper); margin: 1rem 1.5rem; border: 1px solid #e
 table.page { border-collapse: collapse; }
 table.page > thead > tr > td, table.page > tbody > tr > td { padding: 0; }
 table.page > thead > tr > td { padding-bottom: 1rem; }
-table.page > tbody > tr > td > * + * { margin-top: 1rem; }
+.document-body > * + * { margin-top: 1rem; }
 
 header.letterhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
 header.letterhead .titles { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; }
@@ -107,7 +107,224 @@ a:hover { color: var(--link); }
   dl.fields .diff-added { background-color: rgb(74 222 128 / 0.15); color: #4ade80; }
 }
 
+main[data-type="salesinvoice"] {
+  --invoice-ink: #25282d;
+  --invoice-muted: #62676f;
+  --invoice-rule: #d9dde2;
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  margin-inline: auto;
+  padding: 15mm 14mm 17mm;
+  color: var(--invoice-ink);
+  background: #fff;
+  border-color: #dfe2e6;
+  border-radius: 0;
+  box-shadow: none;
+  page: sales-invoice;
+}
+main[data-type="salesinvoice"] table.page {
+  width: 100%;
+  height: calc(297mm - 32mm);
+}
+main[data-type="salesinvoice"] table.page > thead > tr > td { padding-bottom: 1.4rem; }
+main[data-type="salesinvoice"] table.page > tbody > tr > td {
+  height: 1px;
+  vertical-align: top;
+}
+main[data-type="salesinvoice"] .document-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+main[data-type="salesinvoice"] .document-body > * + * { margin-top: 1.5rem; }
+main[data-type="salesinvoice"] header.letterhead {
+  align-items: center;
+  padding-bottom: 1.35rem;
+  border-bottom: 2px solid var(--invoice-ink);
+}
+main[data-type="salesinvoice"] header.letterhead .titles { gap: 0.3rem; }
+main[data-type="salesinvoice"] header.letterhead .titles h1 {
+  color: var(--invoice-ink);
+  font-size: 2.25rem;
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+main[data-type="salesinvoice"] header.letterhead .titles .subject,
+main[data-type="salesinvoice"] header.letterhead .titles .subtitle { color: var(--invoice-muted); }
+main[data-type="salesinvoice"] header.letterhead img.logo {
+  max-width: 48mm;
+  max-height: 30mm;
+  object-fit: contain;
+  filter: none;
+}
+main[data-type="salesinvoice"] img { filter: none; }
+main[data-type="salesinvoice"] section.parties {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 0.55fr) minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 1.5rem;
+  padding: 1.15rem 1.25rem 1.25rem;
+  background: #fff;
+  border: 1px solid var(--invoice-rule);
+  border-radius: 0;
+}
+main[data-type="salesinvoice"] section.parties .divider { display: none; }
+main[data-type="salesinvoice"] section.parties dl { order: 1; }
+main[data-type="salesinvoice"] section.parties .recipient,
+main[data-type="salesinvoice"] section.parties .recipient-spacer { order: 2; }
+main[data-type="salesinvoice"] section.parties address.business { order: 3; }
+main[data-type="salesinvoice"] section.parties address {
+  color: var(--invoice-muted);
+  line-height: 1.45;
+}
+main[data-type="salesinvoice"] section.parties address strong {
+  color: var(--invoice-ink);
+  font-size: 0.95rem;
+}
+main[data-type="salesinvoice"] section.parties address.business {
+  max-width: none;
+  padding-inline-start: 1.25rem;
+  border-inline-start: 1px solid var(--invoice-rule);
+}
+main[data-type="salesinvoice"] section.parties dl {
+  display: grid;
+  align-content: start;
+  gap: 0.1rem;
+  text-align: start;
+}
+main[data-type="salesinvoice"] section.parties dt {
+  color: var(--invoice-muted);
+  font-size: 0.66rem;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+main[data-type="salesinvoice"] section.parties dd {
+  margin-bottom: 0.8rem;
+  color: var(--invoice-ink);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+main[data-type="salesinvoice"] p.table-description {
+  color: var(--invoice-muted);
+  font-weight: 500;
+}
+main[data-type="salesinvoice"] table.body {
+  width: 100%;
+  min-width: 0;
+  color: var(--invoice-ink);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+main[data-type="salesinvoice"] table.body.with-totals thead th {
+  padding: 0.65rem 0.7rem;
+  color: #fff;
+  background: var(--invoice-ink);
+  border: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+main[data-type="salesinvoice"] table.body.with-totals tbody td,
+main[data-type="salesinvoice"] table.body.with-totals tbody td:last-child {
+  padding: 0.65rem 0.7rem;
+  border-inline: 0;
+  border-bottom: 1px solid var(--invoice-rule);
+}
+main[data-type="salesinvoice"] table.body.with-totals tbody tr.spacer td {
+  height: 0.65rem;
+  padding: 0;
+  border-bottom: 1px solid var(--invoice-rule);
+}
+main[data-type="salesinvoice"] table.body.with-totals tbody tr.total td.label {
+  padding-block: 0.4rem;
+  color: var(--invoice-muted);
+  border: 0;
+}
+main[data-type="salesinvoice"] table.body.with-totals tbody tr.total td.value {
+  padding-block: 0.4rem;
+  color: var(--invoice-ink);
+  border: 0;
+  border-bottom: 1px solid var(--invoice-rule);
+  font-weight: 600;
+}
+main[data-type="salesinvoice"] table.body.with-totals tbody tr.total.emphasis td {
+  padding-block: 0.75rem;
+  color: var(--invoice-ink);
+  font-size: 0.95rem;
+  font-weight: 750;
+  border-bottom-color: var(--invoice-ink);
+}
+main[data-type="salesinvoice"] .payment-details {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.38fr) minmax(0, 1fr);
+  width: 100%;
+  margin-top: auto !important;
+  padding-top: 0.85rem;
+  break-inside: avoid;
+  background: #fff;
+  border-top: 1px solid #9ca3af;
+}
+main[data-type="salesinvoice"] .payment-details-title {
+  padding: 0 1rem 0 0;
+  color: var(--invoice-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-inline-end: 1px solid var(--invoice-rule);
+}
+main[data-type="salesinvoice"] .payment-details-value {
+  padding: 0 0 0 1rem;
+  color: var(--invoice-ink);
+  font-weight: 600;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+main[data-type="salesinvoice"] .emphasis-banner > div {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.78rem;
+  border-width: 1px;
+  border-radius: 0.25rem;
+}
+main[data-type="salesinvoice"] .footer,
+main[data-type="salesinvoice"] .footer * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+@media screen and (max-width: 48rem) {
+  main[data-type="salesinvoice"] {
+    width: calc(100vw - 1rem);
+    min-width: 0;
+    min-height: 0;
+    margin: 0.5rem;
+    padding: 1.25rem;
+  }
+  main[data-type="salesinvoice"] table.page { height: auto; }
+  main[data-type="salesinvoice"] .document-body { height: auto; }
+  main[data-type="salesinvoice"] section.parties { grid-template-columns: 1fr; }
+  main[data-type="salesinvoice"] section.parties address.business {
+    padding-block-start: 1rem;
+    padding-inline-start: 0;
+    border-block-start: 1px solid var(--invoice-rule);
+    border-inline-start: 0;
+  }
+  main[data-type="salesinvoice"] .payment-details { grid-template-columns: 1fr; }
+  main[data-type="salesinvoice"] .payment-details-title {
+    padding: 0 0 0.6rem;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--invoice-rule);
+  }
+  main[data-type="salesinvoice"] .payment-details-value {
+    padding: 0.6rem 0 0;
+  }
+}
+
 @page { margin: 10mm; }
+@page sales-invoice { size: A4 portrait; margin: 13mm 14mm 15mm; }
 @media print {
   :root { --rule: #000; --link: #000; }
   body { background-color: initial; display: initial; }
@@ -121,6 +338,32 @@ a:hover { color: var(--link); }
   p.table-description { max-width: none; }
   table.page > thead { display: table-header-group; }
   table.body > thead { display: table-header-group; }
+  main[data-type="salesinvoice"] {
+    width: auto;
+    min-height: auto;
+    color: var(--invoice-ink);
+    background: #fff;
+  }
+  main[data-type="salesinvoice"] table.page { height: calc(297mm - 28mm - 1px); }
+  main[data-type="salesinvoice"] .document-body { break-inside: auto; }
+  main[data-type="salesinvoice"] section.parties {
+    break-inside: avoid;
+    break-after: avoid;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+  main[data-type="salesinvoice"] table.body { break-inside: auto; page-break-inside: auto; }
+  main[data-type="salesinvoice"] table.body tbody:not(.totals) { break-inside: auto; page-break-inside: auto; }
+  main[data-type="salesinvoice"] table.body tbody tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  main[data-type="salesinvoice"] table.body tbody.totals,
+  main[data-type="salesinvoice"] .payment-details,
+  main[data-type="salesinvoice"] .emphasis-banner {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
 </style>
 </head>
@@ -151,6 +394,7 @@ document.currentScript.remove();
     if (model.recipient && model.recipient.name) pageTitle += ' — ' + model.recipient.name;
     document.title = pageTitle;
     if (model.direction) document.documentElement.dir = model.direction;
+    if (model.type) root.dataset.type = model.type;
     render(root, model);
   } catch (err) {
     root.textContent = 'Failed to load: ' + err;
@@ -254,20 +498,22 @@ function render(root, m) {
   const body = el('td');
   pageTable.appendChild(el('tbody', null, el('tr', null, body)));
   root.appendChild(pageTable);
+  const bodyContent = el('div', { class: 'document-body' });
+  body.appendChild(bodyContent);
 
   // Recipient + top-of-page fields + business address
   const topFields = (m.fields || []).filter(f => f.displayAtTheTop === true);
   const hasParties = !!m.recipient || topFields.length > 0 || hasBusinessBlock(m.business);
-  if (hasParties) body.appendChild(renderParties(m, topFields));
+  if (hasParties) bodyContent.appendChild(renderParties(m, topFields));
 
   // Table description (prose attached to the table)
   if (m.table && m.table.description) {
-    body.appendChild(el('p', { class: 'table-description' }, m.table.description));
+    bodyContent.appendChild(el('p', { class: 'table-description' }, m.table.description));
   }
 
   // Body table — bordered when document-level totals are present, borderless otherwise.
   if (m.table && hasTableContent(m.table)) {
-    body.appendChild(m.totals != null ? renderBorderedTable(m.table, m.totals) : renderBorderlessTable(m.table));
+    bodyContent.appendChild(m.totals != null ? renderBorderedTable(m.table, m.totals, m.type === 'salesinvoice') : renderBorderlessTable(m.table));
   }
 
   // Bottom fields (anything not flagged for the header)
@@ -275,7 +521,7 @@ function render(root, m) {
   if (bottomFields.length) {
     const dl = el('dl', { class: 'fields' });
     appendFieldsToDl(dl, bottomFields);
-    body.appendChild(dl);
+    bodyContent.appendChild(dl);
   }
 
   // Pre-rendered HTML footers
@@ -284,7 +530,7 @@ function render(root, m) {
       const div = document.createElement('div');
       div.className = 'footer';
       div.innerHTML = footer;
-      body.appendChild(div);
+      bodyContent.appendChild(div);
     }
   }
 
@@ -295,13 +541,28 @@ function render(root, m) {
     if (m.status.tone === 'positive') toneClass = 'tone-positive';
     else if (m.status.tone === 'negative') toneClass = 'tone-negative';
     banner.appendChild(el('div', { class: toneClass }, m.status.text));
-    body.appendChild(banner);
+    bodyContent.appendChild(banner);
+  }
+
+  // Payment instructions are the final document footer. Flex spacing places them at the
+  // bottom of a short A4 invoice without overlaying tables that continue onto later pages.
+  if (m.bankAccountInfo && m.bankAccountInfo.text) {
+    bodyContent.appendChild(renderPaymentDetails(m.bankAccountInfo));
   }
 }
 
 function hasBusinessBlock(business) {
   if (!business) return false;
   return !!(business.name || business.address || (business.fields && business.fields.length));
+}
+
+function renderPaymentDetails(field) {
+  const section = el('section', { class: 'payment-details', 'data-key': field.key || '' });
+  section.appendChild(el('div', { class: 'payment-details-title' }, field.label || ''));
+  const value = el('div', { class: 'payment-details-value' });
+  value.appendChild(multiline(field.text || ''));
+  section.appendChild(value);
+  return section;
 }
 
 function hasTableContent(t) {
@@ -432,7 +693,7 @@ function renderBorderlessTable(t) {
   return table;
 }
 
-function renderBorderedTable(t, totals) {
+function renderBorderedTable(t, totals, keepTotalsTogether) {
   const { leaves, groups, hasSubcolumns } = flattenColumns(t.columns || []);
   const hierarchical = isHierarchical(t.rows);
   const totalCols = leaves.length;
@@ -454,8 +715,13 @@ function renderBorderedTable(t, totals) {
   const lastRow = tbody.lastElementChild;
   const trailingSubtotal = lastRow && lastRow.classList.contains('subtotal');
   const spacer = spacerRow(totalCols);
-  if (trailingSubtotal) tbody.insertBefore(spacer, lastRow);
-  else tbody.appendChild(spacer);
+  const totalsBody = keepTotalsTogether ? el('tbody', { class: 'totals' }) : tbody;
+  if (trailingSubtotal) {
+    tbody.insertBefore(spacer, lastRow);
+    if (keepTotalsTogether) totalsBody.appendChild(lastRow);
+  } else {
+    tbody.appendChild(spacer);
+  }
   const labelColspan = Math.max(totalCols - 1, 1);
   for (const t of totals) {
     const tr = el('tr', { class: 'total' + (t.emphasis ? ' emphasis' : '') });
@@ -465,10 +731,11 @@ function renderBorderedTable(t, totals) {
     if (t.number != null) valueTd.setAttribute('data-value', String(t.number));
     valueTd.appendChild(document.createTextNode(t.text || ''));
     tr.appendChild(valueTd);
-    tbody.appendChild(tr);
+    totalsBody.appendChild(tr);
   }
 
   table.appendChild(tbody);
+  if (keepTotalsTogether) table.appendChild(totalsBody);
   return table;
 }
 

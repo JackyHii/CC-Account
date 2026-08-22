@@ -28,8 +28,14 @@ namespace ManagerServer.Api.Businesses.Business
         [Description("Document reference / identifier (e.g. invoice number).")]
         public string? Reference { get; set; }
 
+        [Description("Stable source object type used by themes for document-specific presentation.")]
+        public string? Type { get; set; }
+
         [Description("Issuing business — name, address, logo, custom fields.")]
         public BusinessInfo? Business { get; set; }
+
+        [Description("Optional bank account information shown in the payment section of sales invoices.")]
+        public FieldInfo? BankAccountInfo { get; set; }
 
         [Description("Recipient party (customer, supplier, employee). Null for non-document views like reports.")]
         public RecipientInfo? Recipient { get; set; }

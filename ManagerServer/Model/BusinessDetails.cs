@@ -25,6 +25,11 @@ namespace ManagerServer.Model
         [Guide("This address appears on all customer documents and should match your official business registration.")]
         [ProtoMember(2), Textarea, Placeholder(nameof(Strings.Address))] public string Address { get; set; }               
 
+        [Guide("Enter the bank account information customers should use when paying sales invoices.")]
+        [Guide("Use separate lines for the account number, bank name, and account holder name.")]
+        [Guide("This information appears in the payment section at the bottom of sales invoices.")]
+        [ProtoMember(8), Textarea, Long, Placeholder(nameof(Strings.BankAccountInfo))] public string BankAccountInfo { get; set; }
+
         [Guide("Add business-specific information using custom fields configured under `Settings` → `CustomFields`.")]
         [Guide("Common uses include tax registration numbers, business license details, or industry certifications.")]
         [Guide("Custom fields appear on documents and reports based on your configuration settings.")]

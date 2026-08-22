@@ -71,7 +71,7 @@ namespace ManagerServer.HttpHandlers.Businesses
 
                                     using (Div())
                                     {
-                                        InputFile(name: "File", id: "File", accept: Whitelabel.IsEnabled ? ".bak" : ".manager,.tar", form: "form", @class: "form-file");
+                                        FileDropZone(name: "File", id: "File", accept: Whitelabel.IsEnabled ? ".bak" : ".manager,.tar", form: "form");
                                     }
 
                                     Hr();

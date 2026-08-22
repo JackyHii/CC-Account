@@ -17,6 +17,7 @@ namespace ManagerServer.Api.Businesses.Business
         public List<CustomField> custom_fields { get; set; } = new List<CustomField>();
         public Table table { get; set; } = new Table();
         public Business business { get; set; } = new Business();
+        public CustomField bank_account_info { get; set; }
         public Recipient recipient { get; set; } = new Recipient();
         public long timestamp { get; set; }
         public string[] footers { get; set; }

@@ -1596,7 +1596,7 @@ async function createInvoiceCustomer(owner) {
                                 {
                                     if (!e.LockedForManualEditing)
                                     {
-                                        InputFile(@class: "form-control", vShow: $"!{v_model}", name: v_model, accept: "image/*", hxPost: new Image() { Business = Business }.ToUrl(), hxTrigger: "change", hxEncoding: "multipart/form-data", hxTarget: "this", hxSwap: "afterend", hxDisabledElt: "this");
+                                        FileDropZone(vShow: $"!{v_model}", name: v_model, accept: "image/*", hxPost: new Image() { Business = Business }.ToUrl(), hxTrigger: "change", hxEncoding: "multipart/form-data", hxTarget: "this", hxSwap: "afterend", hxDisabledElt: "this");
                                         InputHidden(id: v_model, v_model: v_model);
                                     }
                                     Write(@$"<img class=""form-control"" style=""width: {imageCustomField.GetWidth()}px; height: {imageCustomField.GetHeight()}px"" v-if=""{v_model}"" :src=""`{new Image() { Business = Business }.ToUrl()}&key=${{{v_model}}}`"" />");

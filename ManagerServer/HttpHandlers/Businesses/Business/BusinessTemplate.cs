@@ -663,10 +663,12 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
                     var userPermissions = this.GetCurrentUserPermissions(Business);
                     foreach (var e in ApplicationData.Businesses.Get(Business).OfType<ManagerServer.Model.Attachment>().Where(x => x.Object == key).OrderBy(x => x.Name))
                     {
+                        var isPdf = e.Name.EndsWith(".pdf", System.StringComparison.OrdinalIgnoreCase);
                         using (Div(@class: "btn-group"))
                         {
-                            using (A(@class: "btn btn-sm", href: new ViewAttachment() { Business = Business, Key = e.Key }.ToUrl()))
+                            using (A(@class: "btn btn-sm", href: new ViewAttachment() { Business = Business, Key = e.Key }.ToUrl(), target: isPdf ? "_blank" : null, rel: isPdf ? "noopener" : null))
                             {
+                                if (isPdf) I(@class: "fa-solid fa-file-pdf me-2 text-rose-600");
                                 Write(e.Name);
                             }
                             if (!userPermissions.CanDelete(this.GetType().Namespace))
@@ -726,12 +728,13 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
             }
         }
 
-        protected void PrintEmailButtons(string subject, string to, string body, string variables, Guid? source)
+        protected void PrintEmailButtons(string subject, string to, string body, string variables, Guid? source, string pdfUrl = null)
         {
             using (Div(@class: "flex items-center gap-1"))
             {
                 using (Script())
                 {
+                    Write("var documentPdfUrl = " + JsonSerializer.Serialize(pdfUrl) + ";");
                     Write("function getIframe() {");
                     Write("return document.getElementById('iframeView').contentWindow.document.getElementById('iframeView') ?? document.getElementById('iframeView');");
                     Write("}");
@@ -740,6 +743,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
                     Write("}");
                     // This workaround is required because of bug in Chromium: https://issues.chromium.org/issues/382394786
                     Write("function printIframe() {");
+                    Write("if (documentPdfUrl) { window.open(documentPdfUrl, '_blank', 'noopener'); return; }");
                     Write("const iframe = getIframe();");
                     Write("const originalTitle = document.title;");
                     Write("document.title = iframe.contentDocument?.title;");
@@ -749,7 +753,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
                 }
                 using (Button(onclick: "printIframe()", @class: "btn")) Write(Strings.Print);
 
-                using (Button(onclick: "getPdf(this, getIframeTitle() + '.pdf')", @class: "btn group"))
+                using (Button(onclick: "getPdf(this, getIframeTitle() + '.pdf', documentPdfUrl)", @class: "btn group"))
                 {
                     Write("PDF");
                     I(@class: "ms-2 fas fa-circle-notch fa-spin !hidden group-disabled:!inline-block");
@@ -766,6 +770,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
                         InputHidden(name: nameof(SendEmail.FormData.Body), value: body);
                         InputHidden(name: nameof(SendEmail.FormData.Filename));
                         InputHidden(name: "Variables", value: variables);
+                        if (!string.IsNullOrWhiteSpace(pdfUrl)) InputHidden(name: "document-pdf-url", value: pdfUrl);
                         using (Button(@class: "btn group"))
                         {
                             Write(Strings.Email);

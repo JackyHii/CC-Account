@@ -46,6 +46,11 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
         private string GetHtml(Guid key, long? timestamp)
         {
             if (!timestamp.HasValue) return null;
+            if (ApplicationData.Businesses.GetImageContentType(Business, key) == "application/pdf")
+            {
+                var url = System.Net.WebUtility.HtmlEncode(new ViewObjectFile { Business = Business, Key = key }.ToUrl());
+                return $@"<a href=""{url}"" target=""_blank"" rel=""noopener"" title=""PDF""><i class=""fas fa-file-pdf text-rose-600 hover:text-rose-700 cursor-pointer text-base""></i></a>";
+            }
             return $@"<i class=""fas fa-image text-(--muted-foreground)/50 hover:text-(--muted-foreground) cursor-pointer text-base"" onclick=""showImage(this, '{key.ToString()}',{timestamp.Value})""></i>";
         }
 

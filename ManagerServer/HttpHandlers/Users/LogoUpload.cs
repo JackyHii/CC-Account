@@ -52,7 +52,7 @@ namespace ManagerServer.HttpHandlers.Users
 
                                 if (!await ApplicationData.Assets.ExistsAsync("logo.png"))
                                 {
-                                    InputFile(name: "Logo", @class: "form-file");
+                                    FileDropZone(name: "Logo", accept: ".png,image/png");
                                 }
                                 else
                                 {

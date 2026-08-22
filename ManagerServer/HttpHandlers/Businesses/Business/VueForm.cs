@@ -190,7 +190,10 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
                 }
             }
 
-            using (Div(id: "v-model-form"))
+            var formClass = typeof(T) == typeof(SalesInvoice)
+                ? "transaction-entry-form sales-invoice-form"
+                : typeof(T) == typeof(Payment) ? "transaction-entry-form payment-form" : null;
+            using (Div(id: "v-model-form", @class: formClass))
             {
                 using (Div(@class: "card"))
                 {
@@ -257,33 +260,76 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
 
                             if (CanHaveImage())
                             {
+                                var supportsPdf = typeof(T) == typeof(SalesInvoice) || typeof(T) == typeof(Payment);
                                 using (Script())
                                 {
-                                    Write(@"function previewImage() {
+                                    Write(@"function previewFile() {
   var preview = document.querySelector('#display-image');
-  var file = document.querySelector('#image-input').files[0];
+  var pdfPreview = document.querySelector('#display-pdf');
+  var input = document.querySelector('#image-input');
+  var file = input.files[0];
+  if (!file) return;
+  var isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  if (isPdf && !");
+                                    Write(supportsPdf ? "true" : "false");
+                                    Write(@") {
+    input.value = '';
+    input.closest('.file-drop-zone').querySelector('.file-drop-zone-name').textContent = 'PDF files are not supported here';
+    return;
+  }
+
+  input.closest('.file-drop-zone-wrapper').classList.add('hidden');
+  document.querySelector('#removeImageButton').classList.remove('hidden');
+
+  if (isPdf) {
+    preview.removeAttribute('src');
+    preview.classList.add('hidden');
+    pdfPreview.href = URL.createObjectURL(file);
+    pdfPreview.classList.remove('hidden');
+    return;
+  }
+
+  pdfPreview.removeAttribute('href');
+  pdfPreview.classList.add('hidden');
   var reader = new FileReader();
-  reader.onloadend = function () { preview.src = reader.result; document.querySelector('#image-input').classList.add('hidden'); document.querySelector('#removeImageButton').classList.remove('hidden'); }
+  reader.onloadend = function () { preview.src = reader.result; preview.classList.remove('hidden'); }
   if (file) reader.readAsDataURL(file);
 }");
-                                    Write(@"function removeImage() {
+                                    Write(@"function removeFile() {
 document.querySelector('#ImageDeleted').value = 'true';
-document.querySelector('#display-image').src = '';
-document.querySelector('#image-input').value = '';
-document.querySelector('#image-input').classList.remove('hidden');
+var preview = document.querySelector('#display-image');
+var pdfPreview = document.querySelector('#display-pdf');
+var input = document.querySelector('#image-input');
+preview.removeAttribute('src');
+preview.classList.add('hidden');
+pdfPreview.removeAttribute('href');
+pdfPreview.classList.add('hidden');
+input.value = '';
+input.closest('.file-drop-zone-wrapper').classList.remove('hidden');
+input.closest('.file-drop-zone').querySelector('.file-drop-zone-name').textContent = ");
+                Write(System.Text.Json.JsonSerializer.Serialize(Strings.NoFileSelected));
+                                    Write(@";
 document.querySelector('#removeImageButton').classList.add('hidden');
 }");
                                 }
 
                                 using (Fieldset())
                                 {
-                                    using (Legend()) Write(Strings.Image);
+                                    using (Legend()) Write(supportsPdf ? Strings.Image + " / PDF" : Strings.Image);
 
-                                    var dataUrl = Key.HasValue ? ApplicationData.Businesses.GetImageDataUrl(Business, Key.Value) : null;
-                                    using (Div(id: "removeImageButton", @class: "text-end p-2" + (string.IsNullOrWhiteSpace(dataUrl) ? " hidden" : null))) using (Button(onclick: "removeImage()")) I(@class: "fa-solid fa-trash text-neutral-400 hover:text-rose-600");
-                                    Img(id: "display-image", @class: "border rounded", src: dataUrl);
+                                    var storedFile = Key.HasValue ? ApplicationData.Businesses.GetImage(Business, Key.Value) : null;
+                                    var storedFileIsPdf = supportsPdf && storedFile?.Item2 == "application/pdf";
+                                    var dataUrl = storedFile != null && !storedFileIsPdf ? $"data:{storedFile.Item2};base64,{Convert.ToBase64String(storedFile.Item1)}" : null;
+                                    var pdfUrl = storedFileIsPdf ? new ViewObjectFile { Business = Business, Key = Key.Value }.ToUrl() : null;
+                                    using (Div(id: "removeImageButton", @class: "text-end p-2" + (storedFile == null ? " hidden" : null))) using (Button(onclick: "removeFile()")) I(@class: "fa-solid fa-trash text-neutral-400 hover:text-rose-600");
+                                    Img(id: "display-image", @class: "file-image-preview" + (storedFile == null || storedFileIsPdf ? " hidden" : null), src: dataUrl);
+                                    using (A(id: "display-pdf", href: pdfUrl, target: "_blank", rel: "noopener", @class: "file-pdf-preview" + (!storedFileIsPdf ? " hidden" : null)))
+                                    {
+                                        I(@class: "fa-solid fa-file-pdf");
+                                        using (Span()) Write(Strings.View + " PDF");
+                                    }
 
-                                    InputFile(id: "image-input", onchange: "previewImage()", accept: "image/jpeg, image/png, image/jpg", @class: (!string.IsNullOrWhiteSpace(dataUrl) ? "hidden" : "form-file"));
+                                    FileDropZone(id: "image-input", name: "Image", onchange: "previewFile()", accept: supportsPdf ? "image/jpeg,image/png,image/jpg,application/pdf,.pdf" : "image/jpeg,image/png,image/jpg", @class: (storedFile != null ? "hidden" : null));
                                     InputHidden(id: "ImageDeleted", value: "false");
                                 }
                             }
@@ -867,6 +913,15 @@ function postContentAndReturnDecimal(owner, url, setterFunction) {
                 }
             }
 
+            var uploadedFile = form.Files["Image"];
+            var supportsPdfUpload = o is SalesInvoice || o is Payment;
+            if (uploadedFile != null && !uploadedFile.ContentType.StartsWith("image/") && !(supportsPdfUpload && uploadedFile.ContentType == "application/pdf"))
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsync("Unsupported file type.");
+                return;
+            }
+
             try
             {
                 ApplicationData.Businesses.Process(Business, o, GetUserName());
@@ -878,12 +933,12 @@ function postContentAndReturnDecimal(owner, url, setterFunction) {
                 return;
             }
 
-            if (form.Files["Image"] != null)
+            if (uploadedFile != null)
             {
                 using (var ms = new System.IO.MemoryStream())
                 {
-                    await form.Files["Image"].CopyToAsync(ms);
-                    ApplicationData.Businesses.InsertOrReplaceImage(Business, o.Key, ms.ToArray(), form.Files["Image"].ContentType);
+                    await uploadedFile.CopyToAsync(ms);
+                    ApplicationData.Businesses.InsertOrReplaceImage(Business, o.Key, ms.ToArray(), uploadedFile.ContentType);
                 }
             }
             else if (form.ContainsKey("ImageDeleted") && form["ImageDeleted"] == "true")

@@ -113,23 +113,25 @@ namespace ManagerServer.Api.Businesses.Business.SalesInvoices
                 }
             }
 
-            if (!o.HideBalanceDue)
+            if (!o.HideBalanceDue && salesInvoiceAmountDue > 0m && dueDate < DateTime.Today)
             {
-                if (salesInvoiceAmountDue == 0m)
+                if (!o.HideDueDate)
                 {
-                    viewData.emphasis.positive = true;
-                    viewData.emphasis.negative = false;
-                    viewData.emphasis.text = Strings.PaidInFull;
+                    viewData.emphasis.positive = false;
+                    viewData.emphasis.negative = true;
+                    viewData.emphasis.text = Strings.Overdue;
                 }
-                else if (salesInvoiceAmountDue > 0m && dueDate < DateTime.Today)
+            }
+
+            var bankAccountInfo = Database.Single<Model.BusinessDetails>().BankAccountInfo;
+            if (!string.IsNullOrWhiteSpace(bankAccountInfo))
+            {
+                viewData.bank_account_info = new TransactionView.CustomField
                 {
-                    if (!o.HideDueDate)
-                    {
-                        viewData.emphasis.positive = false;
-                        viewData.emphasis.negative = true;
-                        viewData.emphasis.text = Strings.Overdue;
-                    }
-                }
+                    key = nameof(Model.BusinessDetails.BankAccountInfo),
+                    label = Strings.BankAccountInfo,
+                    text = bankAccountInfo
+                };
             }
             
             if (o.TotalAmountInBaseCurrency && currency.HasValue && o.ExchangeRate > 0m)

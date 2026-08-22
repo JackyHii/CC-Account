@@ -22,6 +22,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
         protected virtual Guid? GetHistoryKey() => Key;
         protected virtual IEmailTemplate GetEmailTemplate() { return null; }
         protected virtual string GetRecipient() { return null; }
+        protected virtual string GetPdfUrl() { return null; }
 
         protected virtual Guid? GetCustomTheme()
         {
@@ -228,7 +229,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
                                 }
                             }
 
-                            PrintEmailButtons(subject, GetRecipient(), body, null, Key);
+                            PrintEmailButtons(subject, GetRecipient(), body, null, Key, GetPdfUrl());
                         }
                         using (Div(@class: "flex gap-2 items-center"))
                         {

@@ -443,6 +443,49 @@ namespace ManagerServer.HttpHandlers
             }
         }
 
+        protected void FileDropZone(
+            string id = null,
+            string name = null,
+            string accept = null,
+            string form = null,
+            string onchange = null,
+            string hxPost = null,
+            string hxTrigger = null,
+            string hxEncoding = null,
+            string hxTarget = null,
+            string hxSwap = null,
+            string hxDisabledElt = null,
+            string vShow = null,
+            string @class = null)
+        {
+            var updateFileName = "this.closest('.file-drop-zone').querySelector('.file-drop-zone-name').textContent=this.files.length?this.files[0].name:" + JsonSerializer.Serialize(Strings.NoFileSelected) + ";";
+            var onchangeHandler = System.Net.WebUtility.HtmlEncode(updateFileName + onchange);
+            using (Div(@class: "file-drop-zone-wrapper" + (!string.IsNullOrWhiteSpace(@class) ? " " + @class : null), v_show: vShow))
+            using (Label(@class: "file-drop-zone"))
+            {
+                InputFile(
+                    id: id,
+                    name: name,
+                    accept: accept,
+                    form: form,
+                    onchange: onchangeHandler,
+                    hxPost: hxPost,
+                    hxTrigger: hxTrigger,
+                    hxEncoding: hxEncoding,
+                    hxTarget: hxTarget,
+                    hxSwap: hxSwap,
+                    hxDisabledElt: hxDisabledElt,
+                    @class: "file-drop-zone-input");
+
+                using (Div(@class: "file-drop-zone-content"))
+                {
+                    I(@class: "fa-solid fa-cloud-arrow-up file-drop-zone-icon");
+                    using (Span(@class: "file-drop-zone-title")) Write(Strings.DropFileHereOrClickToUpload);
+                    using (Span(@class: "file-drop-zone-name")) Write(Strings.NoFileSelected);
+                }
+            }
+        }
+
         protected void FormSuccessButton(string label) => FormButton(label, ManagerServer.Globalization.Strings.GetPropertyValue(label), "btn btn-success");
         protected void FormDangerButton(string label) => FormButton(label, ManagerServer.Globalization.Strings.GetPropertyValue(label), "btn btn-danger");
         protected void FormPrimaryButton(string label) => FormButton(label, ManagerServer.Globalization.Strings.GetPropertyValue(label), "btn btn-primary");

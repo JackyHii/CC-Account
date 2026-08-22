@@ -531,6 +531,12 @@ namespace ManagerServer
             }
         }
 
+        internal string GetImageContentType(string fileId, Guid key)
+        {
+            using var db = SQLiteConnection(fileId);
+            return db.ExecuteScalar<string>("SELECT ContentType FROM Images WHERE Key = ?", key);
+        }
+
         internal string GetImageDataUrl(string fileId, Guid key)
         {
             var image = GetImage(fileId, key);

@@ -153,7 +153,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business.BankAndCashAccounts
                                 var extensions = new string[] { "qif", "ofx", "qfx", "qbo", "sta", "swi", "940", "iif", "csv", "camt053", "camt052", "xml" };
 
                                 using (Label()) Write(Strings.SelectFileFromYourComputer);
-                                using (Div()) InputFile(accept: string.Join(",", extensions.Select(x => '.' + x).ToArray()), name: "File", @class: "form-file");
+                                using (Div()) FileDropZone(accept: string.Join(",", extensions.Select(x => '.' + x).ToArray()), name: "File");
                             }
 
                             if (!string.IsNullOrWhiteSpace(error)) using (P(@class: "text-red-500 font-semibold")) Write(error);

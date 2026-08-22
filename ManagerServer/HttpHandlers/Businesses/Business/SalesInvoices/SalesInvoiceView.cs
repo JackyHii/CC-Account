@@ -53,6 +53,17 @@ namespace ManagerServer.HttpHandlers.Businesses.Business.SalesInvoices
             return ApplicationData.Businesses.Get(Business).Single<EmailTemplateForSalesInvoice>();
         }
 
+        protected override string GetPdfUrl()
+        {
+            return new ManagerServer.Api.Businesses.Business.SalesInvoices.GetSalesInvoicePdf
+            {
+                Business = Business,
+                Key = Key,
+                Language = Strings.CurrentLanguage.Value,
+                Referrer = this.ToUrl()
+            }.ToUrl();
+        }
+
         protected override IEnumerable<Tuple<string, BusinessTemplate>> GetFooterButtons()
         {
             yield return new Tuple<string, BusinessTemplate>(Strings.TransactionJournal, new SalesInvoiceTransactionJournalView() { Business = Business, Key = Key, Referrer = this.ToUrl() });

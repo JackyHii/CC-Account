@@ -12,7 +12,8 @@ document.addEventListener("htmx:confirm", async function(e) {
     });
 
     try {
-        const blob = await getBlob();       // your existing function
+        const pdfUrl = form.querySelector('[name="document-pdf-url"]')?.value;
+        const blob = await getBlob(pdfUrl);
         input.value = await blobToBase64(blob);
 
         form.querySelectorAll("input, button, select, textarea").forEach(ctrl => {
@@ -34,7 +35,20 @@ async function sha256Hex(str) {
     return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function getBlob() {
+async function getBlob(pdfUrl) {
+    if (pdfUrl) {
+        const response = await fetch(pdfUrl, {
+            headers: { 'Accept': 'application/pdf' },
+            credentials: 'same-origin',
+        });
+        if (!response.ok) {
+            const text = await response.text();
+            showError(text, response.headers.get('Error-Redirect'));
+            throw Error(text);
+        }
+        return response.blob();
+    }
+
     const iframe = document.getElementById('iframeView').contentWindow.document.getElementById('iframeView') ?? document.getElementById('iframeView');
     const doc = iframe ? iframe.contentWindow.document : document;
 
@@ -91,10 +105,10 @@ async function getBlob() {
     return blob;
 }
 
-async function getPdf(e, filename) {
+async function getPdf(e, filename, pdfUrl) {
     e.disabled = true;
     try {
-        const blob = await getBlob();
+        const blob = await getBlob(pdfUrl);
         const url = URL.createObjectURL(blob);
 
         const a = document.createElement('a');

@@ -578,6 +578,7 @@ namespace ManagerServer.Globalization
         public static string Bank_account => Get(nameof(Bank_account)) ?? "Bank account";
         public static string Bank_charges => Get(nameof(Bank_charges)) ?? "Bank charges";
         public static string BankAccount => Get(nameof(BankAccount)) ?? "Bank account";
+        public static string BankAccountInfo => Get(nameof(BankAccountInfo)) ?? "Bank account information";
         public static string BankAndCashAccounts => Get(nameof(BankAndCashAccounts)) ?? "Bank and Cash Accounts";
         public static string BankAccountSummary => Get(nameof(BankAccountSummary)) ?? "Bank Account Summary";
         public static string BankReconciliation => Get(nameof(BankReconciliation)) ?? "Bank Reconciliation";
@@ -1096,6 +1097,8 @@ namespace ManagerServer.Globalization
         public static string Searching => Get(nameof(Searching)) ?? "Searching ...";
         public static string Select => Get(nameof(Select)) ?? "Select";
         public static string SelectFileFromYourComputer => Get(nameof(SelectFileFromYourComputer)) ?? "Select file from your computer";
+        public static string DropFileHereOrClickToUpload => Get(nameof(DropFileHereOrClickToUpload)) ?? "Drop file here or click to upload";
+        public static string NoFileSelected => Get(nameof(NoFileSelected)) ?? "No file selected";
         public static string Send => Get(nameof(Send)) ?? "Send";
         public static string Sent => Get(nameof(Sent)) ?? "Sent";
         public static string Viewed => Get(nameof(Viewed)) ?? "Viewed";

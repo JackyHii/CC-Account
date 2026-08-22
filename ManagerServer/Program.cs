@@ -25,6 +25,14 @@ namespace ManagerServer
 
             InheritedProtoMemberAttribute.AddInheritedMembersIn(ProtoBuf.Meta.RuntimeTypeModel.Default);
             ProtoBuf.Meta.RuntimeTypeModel.Default.MetadataTimeoutMilliseconds = 5000; // https://stackoverflow.com/questions/7372585/protobuf-net-exception-timeout-while-inspecting-metadata
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+            QuestPDF.Settings.UseEnvironmentFonts = false;
+            using (var regularFont = File.OpenRead(Path.Combine(AppContext.BaseDirectory, "Assets", "NotoSansSC-Regular.otf")))
+            using (var boldFont = File.OpenRead(Path.Combine(AppContext.BaseDirectory, "Assets", "NotoSansSC-Bold.otf")))
+            {
+                QuestPDF.Drawing.FontManager.RegisterFont(regularFont);
+                QuestPDF.Drawing.FontManager.RegisterFont(boldFont);
+            }
 
             var dir = System.IO.Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Manager.io");
 

@@ -25,10 +25,16 @@ namespace ManagerServer.Api.Businesses.Business
             {
                 Title = source.title,
                 Reference = source.reference,
+                Type = source.type,
                 Direction = ParseDirection(source.direction),
                 Language = Languages.GetLanguage(),
                 Totals = []
             };
+
+            if (source.bank_account_info != null)
+            {
+                pv.BankAccountInfo = MapCustomField(source.bank_account_info);
+            }
 
             if (source.business != null)
             {

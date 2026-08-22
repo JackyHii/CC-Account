@@ -111,6 +111,12 @@ namespace ManagerServer.HttpHandlers.Businesses.Business.SalesInvoices
                     }
                     form.Lines = lines.ToArray();
                 }
+
+                if (!Request.HasFormContentType)
+                {
+                    form.HasLineNumber = true;
+                    form.HasLineDescription = true;
+                }
             }
         }
     }
