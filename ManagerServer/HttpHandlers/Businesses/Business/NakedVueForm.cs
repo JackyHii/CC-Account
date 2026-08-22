@@ -58,7 +58,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
         {
             if (queue.Peek().GetCustomAttribute<NoWrapAttribute>() != null)
             {
-                using (Div(@class: "flex gap-2"))
+                using (Div(@class: "form-field-row form-field-row-nowrap flex gap-2"))
                 {
                     using (Div())
                     {
@@ -95,7 +95,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
             }
             else
             {
-                using (Div(@class: "flex")) InnerProcessQueue(queue);
+                using (Div(@class: "form-field-row flex")) InnerProcessQueue(queue);
             }
         }
 
@@ -568,7 +568,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
             var countryCustomFields = countryObjects.OfType<ManagerServer.Model.CustomField>().Where(x => x.Contains(elementType) && !x.Inactive).OrderBy(x => x.Position ?? int.MaxValue).ThenBy(x => x.Name).ToArray();
             var countryCustomFields2 = countryObjects.OfType<ManagerServer.Model.ICustomField>().Where(x => x.Contains(elementType) && !x.Inactive).OrderBy(x => x.Position ?? int.MaxValue).ThenBy(x => x.Name).ToArray();
 
-            using (Div(@class: "form-group flex flex-col gap-2"))
+            using (Div(@class: "form-array-field form-group flex flex-col gap-2"))
             {
                 using (Div(@class: "hidden not-supports-[grid-template-rows:subgrid]:block border p-4"))
                 {
@@ -615,7 +615,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
                 columns++; // duplicate
                 columns++; // delete
 
-                using (Div(@class: "grid gap-y-1", style: $"grid-template-columns: repeat({columns}, auto)"))
+                using (Div(@class: "form-array-grid grid gap-y-1", style: $"grid-template-columns: repeat({columns}, auto)"))
                 {
                     if (field.GetCustomAttribute<EmptyLabelAttribute>() == null)
                     {
@@ -1298,6 +1298,98 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
             if (field.GetMemberType() == typeof(Guid[])) multiple = "true";
 
             var control = $@"<select2 v-model=""{prefix}{field.Name}"" :autocomplete-on-change=""function(item) {{ {onChangeAttributeExpression} }}"" multiple=""{multiple}"" autocomplete-subtext=""{autocompleteAttribute?.Subtext}"" autocomplete-url=""{new Autocomplete() { Business = Business, Types = types, Expand = expand.ToArray() }.ToUrl()}"" :autocomplete-filter=""{autocompleteFilter}"" no-matches-text={AsHtmlAtribute(Strings.NoMatchesFound)} searching-text={AsHtmlAtribute(Strings.Searching)} placeholder={AsHtmlAtribute(placeholder)}></select2>";
+
+            if (typeof(T) == typeof(ManagerServer.Model.SalesInvoice)
+                && field.Name == nameof(ManagerServer.Model.SalesInvoice.Customer)
+                && GetCurrentUserPermissions(Business).CanCreate(typeof(Customers.CustomerForm).Namespace))
+            {
+                using (Div(@class: "quick-create-customer-field"))
+                {
+                    Write(control);
+                    using (Button(id: "quick-create-customer-trigger", type: "button", @class: "btn btn-outline quick-create-customer-trigger", onclick: "toggleQuickCustomerForm(this)"))
+                    {
+                        I(@class: "fas fa-user-plus fa-fw");
+                        using (Span(@class: "quick-create-customer-label")) Write(Strings.NewCustomer);
+                    }
+                }
+
+                using (Div(id: "quick-create-customer-panel", @class: "quick-create-customer-panel hidden"))
+                {
+                    using (Div(@class: "quick-create-customer-input"))
+                    {
+                        using (Label(@for: "quick-create-customer-name")) Write(Strings.Name);
+                        InputText(id: "quick-create-customer-name", @class: "form-control", maxlength: 200, placeholder: Strings.Name, autocomplete: "off");
+                    }
+                    using (Div(@class: "quick-create-customer-actions"))
+                    {
+                        using (Button(type: "button", @class: "btn btn-primary btn-sm", onclick: "createInvoiceCustomer(this)"))
+                        {
+                            Write(Strings.Create);
+                            I(@class: "quick-create-customer-spinner fas fa-circle-notch fa-spin ms-2 hidden");
+                        }
+                        using (Button(type: "button", @class: "btn btn-sm", onclick: "toggleQuickCustomerForm(document.getElementById('quick-create-customer-trigger'))")) Write(Strings.Cancel);
+                    }
+                    using (Div(id: "quick-create-customer-error", @class: "quick-create-customer-error hidden")) { }
+                }
+
+                var createCustomerUrl = Newtonsoft.Json.JsonConvert.SerializeObject(new SalesInvoices.CreateCustomer() { Business = Business }.ToUrl());
+                var requiredMessage = Newtonsoft.Json.JsonConvert.SerializeObject(Strings.Customer + ": " + Strings.Required);
+                using (Script())
+                {
+                    Write(@"
+function toggleQuickCustomerForm(owner) {
+    const panel = document.getElementById('quick-create-customer-panel');
+    const isOpening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    owner.setAttribute('aria-expanded', isOpening.toString());
+    if (isOpening) document.getElementById('quick-create-customer-name').focus();
+}
+
+async function createInvoiceCustomer(owner) {
+    const input = document.getElementById('quick-create-customer-name');
+    const error = document.getElementById('quick-create-customer-error');
+    const name = input.value.trim();
+    error.classList.add('hidden');
+
+    if (!name) {
+        error.textContent = " + requiredMessage + @";
+        error.classList.remove('hidden');
+        input.focus();
+        return;
+    }
+
+    owner.disabled = true;
+    owner.querySelector('.quick-create-customer-spinner').classList.remove('hidden');
+
+    try {
+        const body = new FormData();
+        body.append('Name', name);
+        const response = await fetch(" + createCustomerUrl + @", { method: 'POST', body: body });
+        if (!response.ok) throw new Error(await response.text());
+
+        const customer = await response.json();
+        app.Customer = customer;
+        app.BillingAddress = customer.DefaultBillingAddress;
+        if (customer.HasDefaultDueDateDays) app.DueDateDays = customer.DefaultDueDateDays;
+        app.SalesOrder = null;
+        app.SalesQuote = null;
+
+        input.value = '';
+        toggleQuickCustomerForm(document.getElementById('quick-create-customer-trigger'));
+    }
+    catch (requestError) {
+        error.textContent = requestError.message;
+        error.classList.remove('hidden');
+    }
+    finally {
+        owner.disabled = false;
+        owner.querySelector('.quick-create-customer-spinner').classList.add('hidden');
+    }
+}
+");
+                }
+                return;
+            }
 
             var prepend = field.GetCustomAttribute<PrependAttribute>();
             var append = field.GetCustomAttribute<AppendAttribute>();

@@ -103,9 +103,9 @@ namespace ManagerServer.HttpHandlers.Profile
                                 Write("var elements =  document.getElementsByClassName('userAgent');");
                                 Write("for (var i = 0; i < elements.length; i++) {");
                                 Write("var e = elements[i];");
-                                Write("var parser = new UAParser(e.innerHTML);");
+                                Write("var parser = new UAParser(e.textContent);");
                                 Write("var result = parser.getResult();");
-                                Write("e.innerHTML = result.browser.name+' '+result.browser.version+' &mdash; '+result.os.name+' '+result.os.version;");
+                                Write("e.textContent = result.browser.name+' '+result.browser.version+' — '+result.os.name+' '+result.os.version;");
                                 Write("}");
                             }
                         }

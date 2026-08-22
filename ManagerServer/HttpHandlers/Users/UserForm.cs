@@ -57,7 +57,7 @@ namespace ManagerServer.HttpHandlers.Users
 
             if (user.Businesses == null) user.Businesses = new string[0];
 
-            Script("resources/jquery/jquery-1-8-2-min.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
+            Script("resources/jquery/jquery-3-7-1-min.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
             Script("resources/select2/select2.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
 
             using (Div(@class: "p-8 mx-auto max-w-prose"))
@@ -172,7 +172,7 @@ namespace ManagerServer.HttpHandlers.Users
             {
                 Write("$(function () {");
                 Write("$('form select').select2({ width: '100%' });");
-                Write("$('form select[name=Type]').on('change', function(e) { if (e.val == 'Restricted') { $('#businesses').show(); $('#guides').show(); } else { $('#businesses').hide(); $('#guides').hide(); } });");
+                Write("$('form select[name=Type]').on('change', function() { if ($(this).val() == 'Restricted') { $('#businesses').show(); $('#guides').show(); } else { $('#businesses').hide(); $('#guides').hide(); } });");
                 Write("});");
             }
         }

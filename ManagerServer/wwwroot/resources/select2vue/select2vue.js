@@ -5,57 +5,114 @@ Vue.component("select2", {
             data: []
         }
     },
-    template: "<input type='hidden' />",
+    template: "<select></select>",
+    methods: {
+        normalizeItem: function (item) {
+            if (item == null) return null;
+            var normalized = $.extend({}, item);
+            if (normalized.Key == null) normalized.Key = normalized.id;
+            if (normalized.UniqueName == null) normalized.UniqueName = normalized.text;
+            normalized.id = normalized.Key.toString();
+            normalized.text = normalized.UniqueName;
+            return normalized;
+        },
+        toModelItem: function (item) {
+            if (item == null) return null;
+            if (item.element != null) {
+                var storedItem = $(item.element).data('modelItem');
+                if (storedItem != null) return $.extend({}, storedItem);
+            }
+            var modelItem = {};
+            Object.keys(item).forEach(function (key) {
+                if (['id', 'text', 'title', 'selected', 'disabled', '_resultId', 'element'].indexOf(key) == -1) modelItem[key] = item[key];
+            });
+            modelItem.Key = item.Key == null ? item.id : item.Key;
+            modelItem.UniqueName = item.UniqueName == null ? item.text : item.UniqueName;
+            return modelItem;
+        },
+        setValue: function (value) {
+            var vm = this;
+            var values = this.multiple == 'true' ? (value || []) : (value == null ? [] : [value]);
+            values = values.map(function (item) { return vm.normalizeItem(item); });
+
+            var $element = $(this.$el);
+            values.forEach(function (item) {
+                var exists = $element.find('option').filter(function () { return this.value == item.id; }).length > 0;
+                if (!exists) {
+                    var option = new Option(item.text, item.id, false, false);
+                    $(option).data('modelItem', vm.toModelItem(item));
+                    $element.append(option);
+                }
+            });
+
+            var ids = values.map(function (item) { return item.id; });
+            $element.val(this.multiple == 'true' ? ids : (ids[0] || null)).trigger('change.select2');
+            this.data = value;
+        }
+    },
     mounted: function () {
         var vm = this;
-        this.data = this.value;
+        this.$el.multiple = this.multiple == 'true';
+        if (!this.$el.multiple) this.$el.appendChild(new Option('', '', false, false));
+
         $(this.$el)
-            // init select2
             .select2({
                 allowClear: true,
                 dropdownAutoWidth: true,
                 placeholder: this.placeholder,
-                multiple: (this.multiple == 'true' ? true : false),
-                id: 'Key',
-                formatResult: function (item) {
-                    var output = item.UniqueName;
-                    if (vm.autocompleteSubtext && item[vm.autocompleteSubtext] != null) output = '<div class="flex justify-between items-center gap-3"><div>' + output + '</div><div class="opacity-50">' + item[vm.autocompleteSubtext].UniqueName + '</div></div>';
-                    return output;
+                width: this.width || '100%',
+                templateResult: function (item) {
+                    if (!vm.autocompleteSubtext || item[vm.autocompleteSubtext] == null) return item.UniqueName || item.text;
+
+                    return $('<div class="flex justify-between items-center gap-3"></div>')
+                        .append($('<div></div>').text(item.UniqueName || item.text))
+                        .append($('<div class="opacity-50"></div>').text(item[vm.autocompleteSubtext].UniqueName));
                 },
-                formatSelection: function (item) { return item.UniqueName; },
-                formatNoMatches: this.noMatchesText,
-                formatSearching: this.searchingText,
-                ajax:
-                {
-                    url: function () { return vm.autocompleteUrl },
+                templateSelection: function (item) { return item.UniqueName || item.text; },
+                language: {
+                    noResults: function () { return vm.noMatchesText; },
+                    searching: function () { return vm.searchingText; }
+                },
+                ajax: {
+                    url: function () { return vm.autocompleteUrl; },
                     dataType: 'json',
-                    width: 'copy',
-                    data: function (term, page) { return { Term: term, Page: page, Filter: vm.autocompleteFilter } },
-                    results: function (data, page) { return data; }
+                    delay: 100,
+                    data: function (params) {
+                        return {
+                            Term: params.term || '',
+                            Page: params.page || 1,
+                            Filter: vm.autocompleteFilter
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results.map(function (item) { return vm.normalizeItem(item); }),
+                            pagination: { more: data.more }
+                        };
+                    }
                 }
             })
-            .select2('data', this.data)
-            .trigger("change")
-            // emit event on change.
-            .on("change", function () {
-                vm.data = $(this).select2('data');
-                vm.$emit("input", vm.data);
+            .on('change.select2-vue', function () {
+                var selected = $(this).select2('data')
+                    .filter(function (item) { return item.id != null && item.id.toString().length > 0; })
+                    .map(function (item) { return vm.toModelItem(item); });
+                vm.data = vm.multiple == 'true' ? selected : (selected[0] || null);
+                vm.$emit('input', vm.data);
                 vm.autocompleteOnChange(vm.data);
-            });        
+            });
+
+        this.setValue(this.value);
     },
     watch: {
         value: function (value) {
-            // update value
-            if (this.data != value) {
-                this.data = value;
-                $(this.$el).select2('data', value);
-            }
+            if (this.data != value) this.setValue(value);
         }
     },
     destroyed: function () {
         $(this.$el)
-            .off()
-            .select2("destroy");
+            .off('.select2-vue')
+            .select2('destroy');
     }
 });
 

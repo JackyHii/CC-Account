@@ -78,14 +78,14 @@ namespace ManagerServer.HttpHandlers.Businesses.Business.Settings.EmailSettings.
 			success: function(response, textStatus, jqXHR){
                 $('#email-btn').prop('disabled', false);
 				$('#email-ajax-indicator').hide();
-                $('#emailSuccess').html(jqXHR.responseText);
+                $('#emailSuccess').text(jqXHR.responseText);
                 $('#emailSuccess').show();
 			},
 			// callback handler that will be called on error
 			error: function(jqXHR, textStatus, errorThrown){
 				$('#email-ajax-indicator').hide();
 				$('#email-btn').prop('disabled', false);
-                $('#emailError').html(jqXHR.responseText);
+                $('#emailError').text(jqXHR.responseText);
                 $('#emailError').show();
 			}
 		});

@@ -137,6 +137,7 @@ namespace ManagerServer.HttpHandlers
 
             var entityName = string.Empty;
             var handlerFullName = this.GetType().FullName;
+            var resourceVersion = typeof(Template).Assembly.ManifestModule.ModuleVersionId.ToString("N");
 
             Response.ContentType = "text/html; charset=UTF-8";
 
@@ -149,19 +150,21 @@ namespace ManagerServer.HttpHandlers
                     Title(GetTitle());
                     if (!Whitelabel.IsEnabled)
                     {
-                        Link(rel: "shortcut icon", type: "image/x-icon", href: "favicon.ico?version=" + typeof(Template).Assembly.GetName().Version.ToString());
+                        Link(rel: "shortcut icon", type: "image/x-icon", href: "favicon.ico?version=" + resourceVersion);
                     }
-                    Link(rel: "stylesheet", type: "text/css", href: "resources/fontawesome/fontawesome.css?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Link(rel: "stylesheet", type: "text/css", href: "resources/fontawesome/solid.css?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Link(rel: "stylesheet", type: "text/css", href: "resources/tailwind/output.css?version=" + typeof(Template).Assembly.GetName().Version.ToString());                    
-                    Script("resources/htmx/htmx.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Script("resources/htmx-extensions/pdf.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Script("resources/htmx-extensions/form.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Script("resources/htmx-extensions/error.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Script("resources/custom/time.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Script("resources/custom/tsv.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Script("resources/custom/iframe.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
-                    Script("resources/custom/api-proxy.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
+                    Link(rel: "stylesheet", type: "text/css", href: "resources/fontawesome/fontawesome.css?version=" + resourceVersion);
+                    Link(rel: "stylesheet", type: "text/css", href: "resources/fontawesome/solid.css?version=" + resourceVersion);
+                    Link(rel: "stylesheet", type: "text/css", href: "resources/tailwind/output.css?version=" + resourceVersion);
+                    Link(rel: "stylesheet", type: "text/css", href: "resources/select2/select2.css?version=" + resourceVersion);
+                    Link(rel: "stylesheet", type: "text/css", href: "resources/custom/calico-theme.css?version=" + resourceVersion);
+                    Script("resources/htmx/htmx.js?version=" + resourceVersion);
+                    Script("resources/htmx-extensions/pdf.js?version=" + resourceVersion);
+                    Script("resources/htmx-extensions/form.js?version=" + resourceVersion);
+                    Script("resources/htmx-extensions/error.js?version=" + resourceVersion);
+                    Script("resources/custom/time.js?version=" + resourceVersion);
+                    Script("resources/custom/tsv.js?version=" + resourceVersion);
+                    Script("resources/custom/iframe.js?version=" + resourceVersion);
+                    Script("resources/custom/api-proxy.js?version=" + resourceVersion);
                     using (Style())
                     {
                         CssRule("html:has(dialog:modal)", "overflow: hidden");
@@ -246,7 +249,7 @@ namespace ManagerServer.HttpHandlers
 
                     var currentUser = this.GetCurrentUser();
 
-                    using (Div(@class: "p-4 lg:px-8 flex items-center justify-between gap-2 print:hidden inset-shadow-[var(--inset)] overflow-x-auto lg:overflow-visible no-scrollbar"))
+                    using (Div(@class: "app-navbar p-4 lg:px-8 flex items-center justify-between gap-2 print:hidden inset-shadow-[var(--inset)] overflow-x-auto lg:overflow-visible no-scrollbar"))
                     {
                         using (Div())
                         {
@@ -318,7 +321,7 @@ namespace ManagerServer.HttpHandlers
 
                         if (currentUser != null)
                         {
-                            using (Div(@class: "flex gap-2 font-semibold"))
+                            using (Div(@class: "app-navbar-links flex gap-2 font-semibold"))
                             {
                                 var profile = handlerFullName.StartsWith("ManagerServer.HttpHandlers.Profile.");
                                 var businesses = handlerFullName.StartsWith("ManagerServer.HttpHandlers.Businesses.");
@@ -400,13 +403,16 @@ namespace ManagerServer.HttpHandlers
                         }
                     }                    
 
-                    using (Div(@class: "pb-2 lg:px-8 print:p-0 print:lg:p-0"))
+                    using (Div(@class: "app-content pb-2 lg:px-8 print:p-0 print:lg:p-0"))
                     {
                         await InnerGet();
 
-                        using (Div(@class: "p-4 print:hidden font-semibold text-center text-neutral-400"))
+                        if (this is not BusinessTemplate)
                         {
-                            Write(typeof(Program).Assembly.GetName().Version.ToString());
+                            using (Div(@class: "app-version app-version-page print:hidden"))
+                            {
+                                Write("v" + typeof(Program).Assembly.GetName().Version.ToString());
+                            }
                         }
                     }
 

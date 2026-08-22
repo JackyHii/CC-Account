@@ -48,6 +48,15 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
     }
 });");
             }
+
+            using (Script())
+            {
+                Write(@"document.addEventListener(""keydown"", (event) => {
+    if (event.key === ""Escape"" && window.matchMedia(""(max-width: 63.999rem)"").matches) {
+        document.querySelector("".business-navigation[open]"")?.removeAttribute(""open"");
+    }
+});");
+            }
         }
 
         protected virtual void InnerGet2()
@@ -115,11 +124,11 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
             
             UserPermissions userPermissions = null;
 
-            using (Div(@class: "bg-[var(--muted)] border border-[var(--border)] shadow-[inset_0_1px_var(--muted-inset)] print:hidden overflow-x-auto lg:overflow-visible no-scrollbar"))
+            using (Div(@class: "business-header bg-[var(--muted)] border border-[var(--border)] shadow-[inset_0_1px_var(--muted-inset)] print:hidden overflow-x-auto lg:overflow-visible no-scrollbar"))
             {
-                using (Div(@class: "flex items-center justify-between gap-4 px-4 py-6"))
+                using (Div(@class: "business-header-inner flex items-center justify-between gap-4 px-4 py-6"))
                 {
-                    using (Div(@class: "flex items-center gap-4"))
+                    using (Div(@class: "business-header-identity flex items-center gap-4"))
                     {
                         using (A(href: new HttpHandlers.Businesses.Businesses().ToUrl(), @class: "text-[var(--muted-foreground)]/25 hover:text-[var(--muted-foreground)]/50"))
                         {
@@ -181,7 +190,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
 
                     if (userPermissions.FullAccess)
                     {
-                        using (Div(@class: "flex items-center gap-1"))
+                        using (Div(@class: "business-header-actions flex items-center gap-1"))
                         {
                             using (A(href: new Emails.Emails() { Business = Business }.ToUrl(), @class: "btn")) Write(Strings.Emails);
                             if (ApplicationData.Businesses.Get(Business).Any<ManagerServer.Model.Attachment>())
@@ -214,96 +223,145 @@ namespace ManagerServer.HttpHandlers.Businesses.Business
 
             SetCulture(Business);
 
-            using (Div(@class: "flex flex-col lg:flex-row print:block"))
+            using (Div(@class: "business-layout flex flex-col lg:flex-row print:block"))
             {
-                using (Div(@class: "flex lg:flex-col print:hidden overflow-x-auto lg:overflow-visible no-scrollbar", id: "sidebar"))
+                var tabs = this.GetTabs(applyUserPermissions: true);
+                var activeTab = tabs.GetAll().FirstOrDefault(e => this.GetType().FullName.StartsWith("ManagerServer.HttpHandlers.Businesses.Business." + e.Name + @"."));
+
+                using (Details(id: "business-navigation", @class: "business-navigation print:hidden", open: true))
                 {
-                    var tabs = this.GetTabs(applyUserPermissions: true);
-                    foreach (var e in tabs.GetAll())
+                    using (Summary(@class: "business-navigation-toggle"))
                     {
-                        var style = "group flex justify-between font-semibold px-3 py-2 gap-4 border-e lg:border-s border-b border-[var(--border)]";
-
-                        if (this.GetType().FullName.StartsWith("ManagerServer.HttpHandlers.Businesses.Business." + e.Name + @"."))
+                        using (Span(@class: "business-navigation-current"))
                         {
-                            style += " bg-[var(--card)] lg:border-e-[var(--card)]";
+                            using (Span(@class: "sidebar-icon")) I(@class: "fas fa-fw " + (activeTab == null ? "fa-bars" : Icons.GetIcon(activeTab.Name)));
+                            using (Span(@class: "sidebar-label")) Write(activeTab?.DisplayName ?? GetTitle());
                         }
-                        else
-                        {
-                            style += " bg-[var(--muted)] shadow-[inset_0_1px_var(--muted-inset)]";
-                        }
+                        I(@class: "fas fa-chevron-down business-navigation-chevron");
+                    }
 
-                        if (this is TabsForm)
-                        {
-                            style += " text-[var(--muted-foreground)]/50";
-                        }
+                    using (Button(type: "button", @class: "business-navigation-backdrop", title: "Close menu", onclick: "this.closest('details').removeAttribute('open')"))
+                    {
+                    }
 
-                        var url = e.HttpHandler.ToUrl();
-                        if (this is TabsForm) url = null;
-                        if (!e.Visible)
+                    using (Div(@class: "business-sidebar", id: "sidebar"))
+                    {
+                        using (Div(@class: "business-sidebar-header"))
                         {
-                            if (this is TabsForm)
+                            using (Button(type: "button", @class: "business-sidebar-close", title: "Close menu", onclick: "this.closest('details').removeAttribute('open')"))
                             {
-                                style += " hidden";
-                            }
-                            else
-                            {
-                                continue;
+                                I(@class: "fas fa-xmark fa-fw");
                             }
                         }
 
-                        using (A(href: url, @class: style, id: "tab" + e.Name))
+                        using (Div(@class: "sidebar-items no-scrollbar"))
                         {
-                            using (Span(@class: "flex gap-3 items-center"))
+                            foreach (var e in tabs.GetAll())
                             {
-                                using (Span()) I(@class: "text-[var(--muted-foreground)] opacity-25 fas fa-fw " + Icons.GetIcon(e.Name));
-                                using (Span(@class: $"whitespace-nowrap compact:hidden")) Write(e.DisplayName);
-                            }
+                                var style = $"sidebar-item sidebar-level-{e.Level} group";
 
-                            if (e.Count.HasValue)
-                            {
-                                using (Div(@class: $"flex items-center gap-2 compact:hidden"))
+                                if (e == activeTab)
                                 {
-                                    var style2 = "bg-[var(--input)] border border-[var(--input-border)] text-[var(--input-foreground)]/60 text-xs whitespace-nowrap py-0 px-2 rounded tabular-nums observer:blur-sm observer:hover:blur-none observer:hover:transition";
-                                    if (e.Count.Value == 0) style2 += " opacity-50";
-                                    using (Span(@class: style2)) Write(e.Count.Value.ToString("N0", System.Threading.Thread.CurrentThread.CurrentCulture));
-                                    if (e.PendingCount.HasValue && e.PendingCount.Value > 0)
+                                    style += " sidebar-item-active";
+                                }
+
+                                if (this is TabsForm)
+                                {
+                                    style += " sidebar-item-disabled";
+                                }
+
+                                var url = e.HttpHandler.ToUrl();
+                                if (this is TabsForm) url = null;
+                                if (!e.Visible)
+                                {
+                                    if (this is TabsForm)
                                     {
-                                        using (Span(@class: "bg-[var(--input)] border border-[var(--input-border)] text-[var(--input-foreground)]/60 whitespace-nowrap border text-xs py-0 px-2 rounded tabular-nums observer:blur-sm observer:hover:blur-none observer:hover:transition")) Write("+" + e.PendingCount.Value.ToString("N0", System.Threading.Thread.CurrentThread.CurrentCulture));
+                                        style += " hidden";
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+
+                                using (A(href: url, @class: style, id: "tab" + e.Name))
+                                {
+                                    using (Span(@class: "sidebar-item-main"))
+                                    {
+                                        using (Span(@class: "sidebar-icon")) I(@class: "fas fa-fw " + Icons.GetIcon(e.Name));
+                                        using (Span(@class: "sidebar-label compact:hidden", title: e.DisplayName)) Write(e.DisplayName);
+                                    }
+
+                                    if (e.Count.HasValue)
+                                    {
+                                        using (Div(@class: $"sidebar-counts compact:hidden"))
+                                        {
+                                            var style2 = "sidebar-count observer:blur-sm observer:hover:blur-none observer:hover:transition";
+                                            if (e.Count.Value == 0) style2 += " opacity-50";
+                                            using (Span(@class: style2)) Write(e.Count.Value.ToString("N0", System.Threading.Thread.CurrentThread.CurrentCulture));
+                                            if (e.PendingCount.HasValue && e.PendingCount.Value > 0)
+                                            {
+                                                using (Span(@class: "sidebar-count sidebar-count-pending observer:blur-sm observer:hover:blur-none observer:hover:transition")) Write("+" + e.PendingCount.Value.ToString("N0", System.Threading.Thread.CurrentThread.CurrentCulture));
+                                            }
+                                        }
+                                    }
+
+                                    using (Div(@class: "absolute z-100 py-0.5 px-2 ltr:left-22 rtl:right-22 bg-neutral-900 text-white rounded hidden compact:lg:group-hover:block drop-shadow"))
+                                    {
+                                        Write(e.DisplayName);
+                                    }
+                                }
+                            }
+                        }
+
+                        using (Div(@class: "sidebar-footer"))
+                        {
+                            using (Div(@class: "sidebar-customize"))
+                            {
+                                if (userPermissions.FullAccess)
+                                {
+                                    if (!(this is TabsForm))
+                                    {
+                                        using (Div(@class: $"text-center compact:hidden"))
+                                        {
+                                            using (A(href: new TabsForm() { Business = Business, Key = ManagerServer.Model.Object.GetGuidByType(typeof(ManagerServer.Model.Tabs)) }.ToUrl(), @class: $"sidebar-customize-link compact:hidden"))
+                                            {
+                                                I(@class: "fas fa-sliders fa-fw");
+                                                Write(Strings.Customize);
+                                            }
+                                            if (!ApplicationData.Businesses.Get(Business).Exists<ManagerServer.Model.Tabs>())
+                                            {
+                                                using (Div(@class: $"pt-4 compact:hidden"))
+                                                {
+                                                    I(@class: "fas fa-hand-pointer fa-bounce print:hidden text-neutral-400");
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
 
-                            using (Div(@class: "absolute z-100 py-0.5 px-2 ltr:left-22 rtl:right-22 bg-neutral-900 text-white rounded hidden compact:lg:group-hover:block drop-shadow"))
+                            using (Div(@class: "app-version"))
                             {
-                                Write(e.DisplayName);
-                            }
-                        }
-                    }
-                    using (Div(@class: "border-[var(--border)] lg:border-r rtl:border-l rtl:border-r-0 lg:grow lg:pb-32 lg:pt-6"))
-                    {
-                        if (userPermissions.FullAccess)
-                        {
-                            if (!(this is TabsForm))
-                            {
-                                using (Div(@class: $"text-center compact:hidden"))
-                                {
-                                    using (A(href: new TabsForm() { Business = Business, Key = ManagerServer.Model.Object.GetGuidByType(typeof(ManagerServer.Model.Tabs)) }.ToUrl(), @class: $"font-semibold compact:hidden"))
-                                    {
-                                        Write(Strings.Customize);
-                                    }
-                                    if (!ApplicationData.Businesses.Get(Business).Exists<ManagerServer.Model.Tabs>())
-                                    {
-                                        using (Div(@class: $"py-6 compact:hidden"))
-                                        {
-                                            I(@class: "fas fa-hand-pointer fa-bounce print:hidden text-neutral-400");
-                                        }
-                                    }
-                                }                                
+                                Write("v" + typeof(Program).Assembly.GetName().Version.ToString());
                             }
                         }
                     }
                 }
-                using (Div(@class: "bg-[var(--card)] border-[var(--border)] flex flex-col lg:gap-4 grow p-0 lg:p-6 lg:pb-32 border-e border-b print:lg:p-0 print:border-0 print:bg-transparent"))
+                using (Script())
+                {
+                    Write(@"{
+    const navigation = document.getElementById(""business-navigation"");
+    const desktopView = window.matchMedia(""(min-width: 64rem)"");
+    const syncNavigation = (event) => event.matches
+        ? navigation.setAttribute(""open"", """")
+        : navigation.removeAttribute(""open"");
+
+    syncNavigation(desktopView);
+    desktopView.addEventListener(""change"", syncNavigation);
+}");
+                }
+                using (Div(@class: "business-content bg-[var(--card)] border-[var(--border)] flex flex-col lg:gap-4 grow p-0 lg:p-6 lg:pb-32 border-e border-b print:lg:p-0 print:border-0 print:bg-transparent"))
                 {
                     var isAdministrator = this.IsAdministrator();
                     if (!isAdministrator)

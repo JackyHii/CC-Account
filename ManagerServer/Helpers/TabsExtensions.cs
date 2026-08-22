@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using ManagerServer;
 using ManagerServer.Globalization;
 using ManagerServer.Model;
@@ -78,6 +79,18 @@ namespace ManagerServer.Helpers
             collection.Folders = new Item() { DisplayName = Strings.Folders, Count = GetCount<ManagerServer.Model.Folder>(database), Name = "Folders", HttpHandler = new HttpHandlers.Businesses.Business.Folders.Folders() { Business = fileId }, Visible = o.Folders };            
             collection.Reports = new Item() { DisplayName = Strings.Reports, Name = "Reports", HttpHandler = new HttpHandlers.Businesses.Business.Reports.Reports() { Business = fileId }, Visible = true };
             collection.Settings = new Item() { DisplayName = Strings.Settings, Name = "Settings", HttpHandler = new HttpHandlers.Businesses.Business.Settings.Settings() { Business = fileId }, Visible = true };
+
+            foreach (var item in collection.GetAll())
+            {
+                var property = typeof(ManagerServer.Model.Tabs).GetProperty(item.Name);
+                var parent = property?.GetCustomAttribute<ManagerServer.Model.Attributes.IfTrueAttribute>();
+                while (parent != null)
+                {
+                    item.Level++;
+                    property = typeof(ManagerServer.Model.Tabs).GetProperty(parent.Path[0]);
+                    parent = property.GetCustomAttribute<ManagerServer.Model.Attributes.IfTrueAttribute>();
+                }
+            }
 
             foreach (var e in collection.GetAll().Where(x => !x.Visible && x.Count.HasValue && x.Count.Value > 0)) e.Visible = true;
 
@@ -157,20 +170,20 @@ namespace ManagerServer.Helpers
                     SalesInvoices,
                     CreditNotes,
                     LatePaymentFees,
-                    DeliveryNotes,
                     BillableTime,
                     WithholdingTaxReceipts,
+                    DeliveryNotes,
                     Suppliers,
                     PurchaseQuotes,
                     PurchaseOrders,
                     PurchaseInvoices,
                     DebitNotes,
-                    GoodsReceipts,                    
+                    GoodsReceipts,
+                    Projects,
                     InventoryItems,
                     InventoryTransfers,
                     InventoryWriteOffs,
                     ProductionOrders,
-                    Projects,
                     Employees,
                     Payslips,
                     Investments,
@@ -196,6 +209,7 @@ namespace ManagerServer.Helpers
             public string Name;
             public ManagerServer.HttpHandlers.HttpHandler HttpHandler;
             public bool Visible;
+            public int Level;
         }
     }
 }

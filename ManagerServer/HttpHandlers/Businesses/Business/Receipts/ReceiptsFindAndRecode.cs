@@ -89,7 +89,7 @@ namespace ManagerServer.HttpHandlers.Businesses.Business.Receipts
 
             var selection = rows.Skip(Skip).Take(Take.Value).ToArray();
 
-            Script("resources/jquery/jquery-1-8-2-min.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
+            Script("resources/jquery/jquery-3-7-1-min.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
             Script("resources/select2/select2.js?version=" + typeof(Template).Assembly.GetName().Version.ToString());
             using (Script())
             {

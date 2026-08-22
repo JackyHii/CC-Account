@@ -32,6 +32,10 @@ namespace ManagerServer.HttpHandlers
                             }
                             else
                             {
+                                using (Div(@class: "flex justify-center pb-4"))
+                                {
+                                    Img(src: "/resources/calico-code-studio-logo.png?version=" + typeof(LoginTemplate).Assembly.GetName().Version.ToString(), style: "width: 100%; max-width: 280px; height: auto", alt: "Calico Code Studio");
+                                }
                                 using (Div(@class: "text-xl font-bold")) Write(Strings.Login);
                                 Hr();
                             }

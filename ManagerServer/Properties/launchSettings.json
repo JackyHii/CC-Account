@@ -1,7 +1,8 @@
 {
   "profiles": {
     "ManagerServer": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5100"
     }
   }
 }

@@ -439,7 +439,7 @@ document.querySelector('#removeImageButton').classList.add('hidden');
             Script("resources/vuedraggable/vuedraggable.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Required for reordering rows
             Script("resources/vueselect/vue-select.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Eventually remove
             Script("resources/datepicker/date-picker.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Date pickers
-            Script("resources/jquery/jquery-1-8-2-min.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Required for Select2
+            Script("resources/jquery/jquery-3-7-1-min.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Required for Select2
             Script("resources/decimal/decimal.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Decimal arithmetic
             Script("resources/select2/select2.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Autocomplete dropboxes
             Script("resources/select2vue/select2vue.js?version=" + typeof(Template).Assembly.GetName().Version.ToString()); // Required for Select2 + Vue

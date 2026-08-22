@@ -43,7 +43,7 @@ namespace ManagerServer.Model
         [ProtoMember(11), Short, IfNull(nameof(SalesOrder)), Placeholder(nameof(Strings.Optional)), IfNotEmpty] public string OrderNumber { get; set; }
         [Guide("Select the `Customer` who will receive this invoice.")]
         [Guide("The customer selection determines billing details, payment terms, and applicable pricing.")]
-        [Guide("Create new customers under the `Customers` tab before creating invoices.")]
+        [Guide("Use `New Customer` beside the customer field to create and select a customer without leaving the invoice.")]
         [Guide("Customer currency settings will determine if this is a foreign currency invoice.")]
         [ProtoMember(3), NoWrap, Autocomplete(typeof(Customer)), OnChangeSetDefault(nameof(DueDateDays)), OnChangeSetDefault(nameof(BillingAddress)), OnChangeSetNull(nameof(SalesOrder)), OnChangeSetNull(nameof(SalesQuote))] public Guid? Customer { get; set; }
         [Guide("Link this invoice to a `SalesQuote` if it originated from a quote.")]
